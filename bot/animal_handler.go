@@ -46,7 +46,7 @@ func (eb *EuFeedingBot) ListAnimal() tele.HandlerFunc {
 		}
 
 		if len(list) == 0 {
-			return c.Send("У вас ещё нет животных. Добавьте их!")
+			return c.Send("У вас ещё нет животных. Добавьте их с помощью команды /add <имя>!")
 		} else {
 			return c.Send(fmt.Sprintf("Список ваших животных: %v", list))
 		}

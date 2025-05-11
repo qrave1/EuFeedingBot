@@ -15,13 +15,13 @@ var (
 func (eb *EuFeedingBot) initKeyboard() {
 	menu.Inline(
 		selector.Row(listBtn, /*addBtn*/),
-		selector.Row(btnBack),
+		//selector.Row(btnBack),
 	)
 
 	eb.b.Handle(&listBtn, eb.ListAnimal())
 	//eb.b.Handle(&addBtn, eb.AddAnimal())
 
-	eb.b.Handle(&btnBack, func(c tele.Context) error {
-		return c.Respond()
-	})
+	//eb.b.Handle(&btnBack, func(c tele.Context) error {
+	//	return c.Respond()
+	//})
 }
