@@ -1,13 +1,11 @@
 package bot
 
 import (
+	"errors"
 	"fmt"
-	"log"
-	"time"
 
-	"EuFeeding/entity"
+	"EuFeeding/internal/domain/errs"
 
-	"github.com/google/uuid"
 	tele "gopkg.in/telebot.v4"
 )
 
@@ -16,19 +14,12 @@ func (eb *EuFeedingBot) AddAnimal() tele.HandlerFunc {
 		args := c.Args()
 
 		if len(args) != 1 {
-			return c.Send("Неправильный формат!\nПример команды -> /add Мурзик")
+			return c.Send("Неправильный формат!\nПример команды -> /add <имя>")
 		}
 
 		name := args[0]
 
-		err := eb.animalRepo.Add(
-			entity.Animal{
-				ID:        uuid.New().String(),
-				ChatID:    c.Chat().ID,
-				Name:      name,
-				CreatedAt: time.Now(),
-			},
-		)
+		err := eb.animalUsecase.Add(c.Chat().ID, name)
 		if err != nil {
 			return c.Send("Ошибка создания животного.\nПопробуйте снова!")
 		}
@@ -39,16 +30,15 @@ func (eb *EuFeedingBot) AddAnimal() tele.HandlerFunc {
 
 func (eb *EuFeedingBot) ListAnimal() tele.HandlerFunc {
 	return func(c tele.Context) error {
-		list, err := eb.animalRepo.List(c.Chat().ID)
+		list, err := eb.animalUsecase.List(c.Chat().ID)
 		if err != nil {
-			log.Println("animal list err: ", err)
+			if errors.Is(err, errs.AnimalsNotFound) {
+				return c.Send("У вас ещё нет животных. Добавьте их с помощью команды /add <имя>!")
+			}
+
 			return c.Send("Ошибка получения списка животных")
 		}
 
-		if len(list) == 0 {
-			return c.Send("У вас ещё нет животных. Добавьте их с помощью команды /add <имя>!")
-		} else {
-			return c.Send(fmt.Sprintf("Список ваших животных: %v", list))
-		}
+		return c.Send(fmt.Sprintf("Список ваших животных: %v", list))
 	}
 }

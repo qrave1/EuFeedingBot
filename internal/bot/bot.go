@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"EuFeeding/repository"
+	"EuFeeding/internal/usecase"
 
 	tele "gopkg.in/telebot.v4"
 )
@@ -9,13 +9,13 @@ import (
 type EuFeedingBot struct {
 	b *tele.Bot
 
-	animalRepo repository.AnimalRepository
+	animalUsecase usecase.AnimalUsecase
 }
 
-func NewEuFeedingBot(b *tele.Bot, animal repository.AnimalRepository) *EuFeedingBot {
+func NewEuFeedingBot(b *tele.Bot, animalUsecase usecase.AnimalUsecase) *EuFeedingBot {
 	bot := &EuFeedingBot{
-		b:          b,
-		animalRepo: animal,
+		b:             b,
+		animalUsecase: animalUsecase,
 	}
 
 	bot.InitRoutes()

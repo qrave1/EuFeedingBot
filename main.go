@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"EuFeeding/bot"
-	"EuFeeding/repository"
+	"EuFeeding/internal/bot"
+	"EuFeeding/internal/repository"
 
 	tele "gopkg.in/telebot.v4"
 	"gopkg.in/telebot.v4/middleware"
