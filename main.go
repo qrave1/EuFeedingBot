@@ -1,11 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
-	"os"
+	"log/slog"
 	"time"
 
 	"github.com/qrave1/PetFeedingBot/internal/bot"
+	"github.com/qrave1/PetFeedingBot/internal/config"
 	"github.com/qrave1/PetFeedingBot/internal/repository"
 	"github.com/qrave1/PetFeedingBot/internal/usecase"
 
@@ -15,22 +17,33 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
+	cfg, err := config.New()
+	if err != nil {
+		log.Fatal(err)
+
+		return
+	}
+
 	sett := tele.Settings{
-		Token:  os.Getenv("TOKEN"),
+		Token:  cfg.Token,
 		Poller: &tele.LongPoller{Timeout: 10 * time.Second},
 	}
 
 	b, err := tele.NewBot(sett)
 	if err != nil {
 		log.Fatal(err)
+
 		return
 	}
 
 	b.Use(middleware.AutoRespond())
 
-	db, err := sqlx.Connect("sqlite3", os.Getenv("DATABASE_URL"))
+	db, err := sqlx.ConnectContext(ctx, "sqlite3", cfg.DBPath)
 	if err != nil {
 		log.Fatal(err)
+
 		return
 	}
 
@@ -38,7 +51,17 @@ func main() {
 
 	petUsecase := usecase.NewPetUsecaseImpl(petRepo)
 
-	_ = bot.NewEuFeedingBot(b, petUsecase)
+	_ = bot.NewPetFeedingBot(b, petUsecase)
 
-	b.Start()
+	// TODO: перенести в app.Start()
+	// старт поллинга бота
+	go b.Start()
+
+	select {
+	case <-ctx.Done():
+		slog.Info("Shutting down application...")
+
+		// TODO: тут должен быть просто app.Stop()
+		b.Stop()
+	}
 }

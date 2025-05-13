@@ -9,7 +9,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (eb *EuFeedingBot) AddPet() tele.HandlerFunc {
+func (pf *PetFeedingBot) AddPet() tele.HandlerFunc {
 	return func(c tele.Context) error {
 		args := c.Args()
 
@@ -19,7 +19,7 @@ func (eb *EuFeedingBot) AddPet() tele.HandlerFunc {
 
 		name := args[0]
 
-		err := eb.petUsecase.Add(c.Chat().ID, name)
+		err := pf.petUsecase.Add(c.Chat().ID, name)
 		if err != nil {
 			return c.Send("Ошибка создания питомца.\nПопробуйте снова!")
 		}
@@ -28,9 +28,9 @@ func (eb *EuFeedingBot) AddPet() tele.HandlerFunc {
 	}
 }
 
-func (eb *EuFeedingBot) PetList() tele.HandlerFunc {
+func (pf *PetFeedingBot) PetList() tele.HandlerFunc {
 	return func(c tele.Context) error {
-		list, err := eb.petUsecase.List(c.Chat().ID)
+		list, err := pf.petUsecase.List(c.Chat().ID)
 		if err != nil {
 			if errors.Is(err, errs.PetsNotFound) {
 				return c.Send("У вас ещё нет питомцев. Добавьте их с помощью команды /add <имя>!")

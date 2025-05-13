@@ -4,7 +4,7 @@ import "github.com/caarlos0/env/v11"
 
 type Config struct {
 	Token  string `env:"TOKEN,required" `
-	DBPath string `env:"DB_PATH"`
+	DBPath string `env:"DB_PATH,required"`
 }
 
 func New() (*Config, error) {

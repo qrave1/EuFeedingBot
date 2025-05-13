@@ -6,14 +6,15 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-type EuFeedingBot struct {
+// TODO: убрать эту обёртку, сделать что-то типо хенделеров
+type PetFeedingBot struct {
 	b *tele.Bot
 
 	petUsecase usecase.PetUsecase
 }
 
-func NewEuFeedingBot(b *tele.Bot, petUsecase usecase.PetUsecase) *EuFeedingBot {
-	bot := &EuFeedingBot{
+func NewPetFeedingBot(b *tele.Bot, petUsecase usecase.PetUsecase) *PetFeedingBot {
+	bot := &PetFeedingBot{
 		b:          b,
 		petUsecase: petUsecase,
 	}
@@ -25,20 +26,20 @@ func NewEuFeedingBot(b *tele.Bot, petUsecase usecase.PetUsecase) *EuFeedingBot {
 	return bot
 }
 
-func (eb *EuFeedingBot) InitRoutes() {
-	eb.b.Handle("/start", eb.HandleStart())
-	eb.b.Handle("/help", eb.HandleHelp())
+func (pf *PetFeedingBot) InitRoutes() {
+	pf.b.Handle("/start", pf.HandleStart())
+	pf.b.Handle("/help", pf.HandleHelp())
 
-	eb.b.Handle("/add", eb.AddPet())
+	pf.b.Handle("/add", pf.AddPet())
 }
 
-func (eb *EuFeedingBot) HandleStart() tele.HandlerFunc {
+func (pf *PetFeedingBot) HandleStart() tele.HandlerFunc {
 	return func(c tele.Context) error {
 		return c.Send("Привет!", menu)
 	}
 }
 
-func (eb *EuFeedingBot) HandleHelp() func(c tele.Context) error {
+func (pf *PetFeedingBot) HandleHelp() func(c tele.Context) error {
 	return func(c tele.Context) error {
 		return c.Send("Пока пусто!")
 	}
