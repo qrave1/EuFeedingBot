@@ -1,4 +1,4 @@
-package bot
+package telegram
 
 import tele "gopkg.in/telebot.v4"
 
@@ -14,11 +14,11 @@ var (
 
 func (pf *PetFeedingBot) initKeyboard() {
 	menu.Inline(
-		selector.Row(listBtn, /*addBtn*/),
+		selector.Row(listBtn /*addBtn*/),
 		//selector.Row(btnBack),
 	)
 
-	pf.b.Handle(&listBtn, pf.PetList())
+	//pf.b.Handle(&listBtn, pf.PetList())
 	//eb.b.Handle(&addBtn, eb.AddPet())
 
 	//eb.b.Handle(&btnBack, func(c tele.Context) error {

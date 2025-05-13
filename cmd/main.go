@@ -6,14 +6,17 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/qrave1/PetFeedingBot/internal/bot"
-	"github.com/qrave1/PetFeedingBot/internal/config"
+	"github.com/qrave1/PetFeedingBot/cmd/application/config"
+	"github.com/qrave1/PetFeedingBot/internal/infrasctructure/telegram"
+	"github.com/qrave1/PetFeedingBot/internal/infrasctructure/telegram/handlers"
+	"github.com/qrave1/PetFeedingBot/internal/infrasctructure/telegram/presenter"
 	"github.com/qrave1/PetFeedingBot/internal/repository"
 	"github.com/qrave1/PetFeedingBot/internal/usecase"
 
 	"github.com/jmoiron/sqlx"
 	tele "gopkg.in/telebot.v4"
 	"gopkg.in/telebot.v4/middleware"
+	_ "modernc.org/sqlite"
 )
 
 func main() {
@@ -40,7 +43,7 @@ func main() {
 
 	b.Use(middleware.AutoRespond())
 
-	db, err := sqlx.ConnectContext(ctx, "sqlite3", cfg.DBPath)
+	db, err := sqlx.ConnectContext(ctx, "sqlite", cfg.DBPath)
 	if err != nil {
 		log.Fatal(err)
 
@@ -51,7 +54,11 @@ func main() {
 
 	petUsecase := usecase.NewPetUsecaseImpl(petRepo)
 
-	_ = bot.NewPetFeedingBot(b, petUsecase)
+	petPresenter := presenter.NewPetPresenter()
+
+	petHandler := handlers.NewPetHandlerImpl(petUsecase, petPresenter)
+
+	_ = telegram.NewPetFeedingBot(b, petHandler)
 
 	// TODO: перенести в app.Start()
 	// старт поллинга бота

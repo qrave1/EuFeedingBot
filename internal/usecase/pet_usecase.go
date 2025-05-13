@@ -1,6 +1,9 @@
 package usecase
 
 import (
+	"time"
+
+	"github.com/google/uuid"
 	"github.com/qrave1/PetFeedingBot/internal/domain/entity"
 	"github.com/qrave1/PetFeedingBot/internal/domain/errs"
 	"github.com/qrave1/PetFeedingBot/internal/repository"
@@ -23,8 +26,10 @@ func NewPetUsecaseImpl(petRepo repository.PetRepository) *PetUsecaseImpl {
 
 func (a *PetUsecaseImpl) Add(chatID int64, name string) error {
 	pet := entity.Pet{
-		ChatID: chatID,
-		Name:   name,
+		ID:        uuid.New().String(),
+		ChatID:    chatID,
+		Name:      name,
+		CreatedAt: time.Now(),
 	}
 
 	return a.petRepo.Add(pet)

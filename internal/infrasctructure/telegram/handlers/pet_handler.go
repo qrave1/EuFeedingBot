@@ -1,15 +1,31 @@
-package bot
+package handlers
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/qrave1/PetFeedingBot/internal/domain/errs"
+	"github.com/qrave1/PetFeedingBot/internal/infrasctructure/telegram/presenter"
+	"github.com/qrave1/PetFeedingBot/internal/usecase"
 
 	tele "gopkg.in/telebot.v4"
 )
 
-func (pf *PetFeedingBot) AddPet() tele.HandlerFunc {
+type PetHandler interface {
+	AddPet() tele.HandlerFunc
+	PetList() tele.HandlerFunc
+}
+
+type PetHandlerImpl struct {
+	petUsecase   usecase.PetUsecase
+	petPresenter presenter.PetPresenter
+}
+
+func NewPetHandlerImpl(petUsecase usecase.PetUsecase, petPresenter presenter.PetPresenter) *PetHandlerImpl {
+	return &PetHandlerImpl{petUsecase: petUsecase, petPresenter: petPresenter}
+}
+
+func (ph *PetHandlerImpl) AddPet() tele.HandlerFunc {
 	return func(c tele.Context) error {
 		args := c.Args()
 
@@ -19,7 +35,7 @@ func (pf *PetFeedingBot) AddPet() tele.HandlerFunc {
 
 		name := args[0]
 
-		err := pf.petUsecase.Add(c.Chat().ID, name)
+		err := ph.petUsecase.Add(c.Chat().ID, name)
 		if err != nil {
 			return c.Send("Ошибка создания питомца.\nПопробуйте снова!")
 		}
@@ -28,9 +44,9 @@ func (pf *PetFeedingBot) AddPet() tele.HandlerFunc {
 	}
 }
 
-func (pf *PetFeedingBot) PetList() tele.HandlerFunc {
+func (ph *PetHandlerImpl) PetList() tele.HandlerFunc {
 	return func(c tele.Context) error {
-		list, err := pf.petUsecase.List(c.Chat().ID)
+		pets, err := ph.petUsecase.List(c.Chat().ID)
 		if err != nil {
 			if errors.Is(err, errs.PetsNotFound) {
 				return c.Send("У вас ещё нет питомцев. Добавьте их с помощью команды /add <имя>!")
@@ -39,6 +55,8 @@ func (pf *PetFeedingBot) PetList() tele.HandlerFunc {
 			return c.Send("Ошибка получения списка питомцев.\nПопробуйте снова!")
 		}
 
-		return c.Send(fmt.Sprintf("Список ваших питомцев: %v", list))
+		msg := ph.petPresenter.ConvertPetsList(pets)
+
+		return c.Send(fmt.Sprintf("Список ваших питомцев:\n%s", msg), &tele.SendOptions{ParseMode: tele.ModeMarkdownV2})
 	}
 }
