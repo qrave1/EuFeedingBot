@@ -1,7 +1,7 @@
 package bot
 
 import (
-	"EuFeeding/internal/usecase"
+	"github.com/qrave1/PetFeedingBot/internal/usecase"
 
 	tele "gopkg.in/telebot.v4"
 )

@@ -5,10 +5,11 @@ import (
 	"os"
 	"time"
 
-	"EuFeeding/internal/bot"
-	"EuFeeding/internal/repository"
-	"EuFeeding/internal/usecase"
+	"github.com/qrave1/PetFeedingBot/internal/bot"
+	"github.com/qrave1/PetFeedingBot/internal/repository"
+	"github.com/qrave1/PetFeedingBot/internal/usecase"
 
+	"github.com/jmoiron/sqlx"
 	tele "gopkg.in/telebot.v4"
 	"gopkg.in/telebot.v4/middleware"
 )
@@ -27,11 +28,17 @@ func main() {
 
 	b.Use(middleware.AutoRespond())
 
-	petRepo := repository.NewPetRepo()
+	db, err := sqlx.Connect("sqlite3", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
 
-	petUsecase := usecase.NewPetUsecaseImpl()
+	petRepo := repository.NewPetRepo(db)
 
-	_ = bot.NewEuFeedingBot(b, petRepo)
+	petUsecase := usecase.NewPetUsecaseImpl(petRepo)
+
+	_ = bot.NewEuFeedingBot(b, petUsecase)
 
 	b.Start()
 }

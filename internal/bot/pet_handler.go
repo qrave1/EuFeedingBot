@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"EuFeeding/internal/domain/errs"
+	"github.com/qrave1/PetFeedingBot/internal/domain/errs"
 
 	tele "gopkg.in/telebot.v4"
 )

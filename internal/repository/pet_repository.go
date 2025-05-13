@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"EuFeeding/internal/domain/entity"
-	"EuFeeding/internal/repository/dto/v1"
+	"github.com/qrave1/PetFeedingBot/internal/domain/entity"
+	"github.com/qrave1/PetFeedingBot/internal/repository/dto/v1"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/mattn/go-sqlite3"

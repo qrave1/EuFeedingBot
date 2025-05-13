@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	"EuFeeding/internal/domain/entity"
-	"EuFeeding/internal/domain/errs"
-	"EuFeeding/internal/repository"
+	"github.com/qrave1/PetFeedingBot/internal/domain/entity"
+	"github.com/qrave1/PetFeedingBot/internal/domain/errs"
+	"github.com/qrave1/PetFeedingBot/internal/repository"
 )
 
 type PetUsecase interface {
