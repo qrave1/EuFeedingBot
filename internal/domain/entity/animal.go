@@ -2,7 +2,7 @@ package entity
 
 import "time"
 
-type Animal struct {
+type Pet struct {
 	ID        string
 	ChatID    int64
 	Name      string

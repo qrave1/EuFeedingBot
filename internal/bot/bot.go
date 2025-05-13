@@ -9,13 +9,13 @@ import (
 type EuFeedingBot struct {
 	b *tele.Bot
 
-	animalUsecase usecase.AnimalUsecase
+	petUsecase usecase.PetUsecase
 }
 
-func NewEuFeedingBot(b *tele.Bot, animalUsecase usecase.AnimalUsecase) *EuFeedingBot {
+func NewEuFeedingBot(b *tele.Bot, petUsecase usecase.PetUsecase) *EuFeedingBot {
 	bot := &EuFeedingBot{
-		b:             b,
-		animalUsecase: animalUsecase,
+		b:          b,
+		petUsecase: petUsecase,
 	}
 
 	bot.InitRoutes()
@@ -29,7 +29,7 @@ func (eb *EuFeedingBot) InitRoutes() {
 	eb.b.Handle("/start", eb.HandleStart())
 	eb.b.Handle("/help", eb.HandleHelp())
 
-	eb.b.Handle("/add", eb.AddAnimal())
+	eb.b.Handle("/add", eb.AddPet())
 }
 
 func (eb *EuFeedingBot) HandleStart() tele.HandlerFunc {

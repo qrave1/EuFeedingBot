@@ -3,5 +3,5 @@ package errs
 import "errors"
 
 var (
-	AnimalsNotFound = errors.New("animals not found")
+	PetsNotFound = errors.New("pets not found")
 )

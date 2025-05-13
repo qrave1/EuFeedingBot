@@ -7,6 +7,7 @@ import (
 
 	"EuFeeding/internal/bot"
 	"EuFeeding/internal/repository"
+	"EuFeeding/internal/usecase"
 
 	tele "gopkg.in/telebot.v4"
 	"gopkg.in/telebot.v4/middleware"
@@ -26,9 +27,11 @@ func main() {
 
 	b.Use(middleware.AutoRespond())
 
-	animalRepo := repository.NewAnimalRepo()
+	petRepo := repository.NewPetRepo()
 
-	_ = bot.NewEuFeedingBot(b, animalRepo)
+	petUsecase := usecase.NewPetUsecaseImpl()
+
+	_ = bot.NewEuFeedingBot(b, petRepo)
 
 	b.Start()
 }
