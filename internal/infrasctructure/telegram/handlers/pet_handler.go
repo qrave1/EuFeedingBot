@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/qrave1/PetFeedingBot/internal/domain/errs"
 	"github.com/qrave1/PetFeedingBot/internal/infrasctructure/telegram/presenter"
 	"github.com/qrave1/PetFeedingBot/internal/usecase"
 
@@ -13,7 +11,7 @@ import (
 
 type PetHandler interface {
 	AddPet() tele.HandlerFunc
-	PetList() tele.HandlerFunc
+	//PetList() tele.HandlerFunc
 }
 
 type PetHandlerImpl struct {
@@ -44,19 +42,9 @@ func (ph *PetHandlerImpl) AddPet() tele.HandlerFunc {
 	}
 }
 
-func (ph *PetHandlerImpl) PetList() tele.HandlerFunc {
-	return func(c tele.Context) error {
-		pets, err := ph.petUsecase.List(c.Chat().ID)
-		if err != nil {
-			if errors.Is(err, errs.PetsNotFound) {
-				return c.Send("У вас ещё нет питомцев. Добавьте их с помощью команды /add <имя>!")
-			}
-
-			return c.Send("Ошибка получения списка питомцев.\nПопробуйте снова!")
-		}
-
-		msg := ph.petPresenter.ConvertPetsList(pets)
-
-		return c.Send(fmt.Sprintf("Список ваших питомцев:\n%s", msg), &tele.SendOptions{ParseMode: tele.ModeMarkdownV2})
-	}
-}
+// TODO: cleanup
+//func (ph *PetHandlerImpl) PetList() tele.HandlerFunc {
+//	return func(c tele.Context) error {
+//
+//	}
+//}

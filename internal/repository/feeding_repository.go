@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/qrave1/PetFeedingBot/internal/domain/entity"
@@ -10,8 +11,8 @@ import (
 
 type FeedingRepository interface {
 	Create(ctx context.Context, feeding entity.Feeding) error
-	GetForPet(ctx context.Context, petID string) (entity.Feeding, error)
-	//Update(ctx context.Context, feeding entity.Feeding) error
+	GetForPet(ctx context.Context, petID string, month time.Time) ([]entity.Feeding, error)
+	GetForChat(ctx context.Context, chatID int64, month time.Time) ([]entity.Feeding, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -29,7 +30,6 @@ func (r *feedingRepository) Create(ctx context.Context, feeding entity.Feeding) 
 		PetID:     feeding.PetID,
 		FeedingAt: feeding.FeedingAt,
 		FoodType:  feeding.FoodType,
-		CreatedAt: feeding.CreatedAt,
 	}
 
 	query := `
@@ -41,24 +41,71 @@ func (r *feedingRepository) Create(ctx context.Context, feeding entity.Feeding) 
 	return err
 }
 
-func (r *feedingRepository) GetForPet(ctx context.Context, petID string) (entity.Feeding, error) {
-	var feedingDTO v1.Feeding
+func (r *feedingRepository) GetForPet(ctx context.Context, petID string, month time.Time) ([]entity.Feeding, error) {
+	var feedingDTO []v1.Feeding
 
-	query := `SELECT * FROM feeding WHERE pet_id = $1`
+	query := `SELECT * FROM feeding 
+         WHERE pet_id = $1 
+           AND strftime('%m', feeding_at) =$2 
+           AND strftime('%Y', feeding_at) = $3;`
 
-	err := r.db.SelectContext(ctx, &feedingDTO, query, petID)
+	err := r.db.SelectContext(ctx, &feedingDTO, query, petID, month.Month(), month.Year())
 
 	if err != nil {
-		return entity.Feeding{}, err
+		return nil, err
 	}
 
-	return entity.Feeding{
-		ID:        feedingDTO.ID,
-		PetID:     feedingDTO.PetID,
-		FeedingAt: feedingDTO.FeedingAt,
-		FoodType:  feedingDTO.FoodType,
-		CreatedAt: feedingDTO.CreatedAt,
-	}, nil
+	feedings := make([]entity.Feeding, 0, len(feedingDTO))
+
+	for _, feeding := range feedingDTO {
+		feedings = append(feedings,
+			entity.Feeding{
+				ID:        feeding.ID,
+				PetID:     feeding.PetID,
+				FeedingAt: feeding.FeedingAt,
+				FoodType:  feeding.FoodType,
+			},
+		)
+	}
+
+	return feedings, nil
+}
+
+func (r *feedingRepository) GetForChat(ctx context.Context, chatID int64, month time.Time) ([]entity.Feeding, error) {
+	var feedingDTO []v1.Feeding
+
+	query := `
+	SELECT 
+		feeding.id,
+		feeding.pet_id,
+		feeding.feeding_at,
+		feeding.food_type
+	FROM feeding
+         JOIN pets on pets.id = feeding.pet_id
+	WHERE pets.chat_id = $1
+  	AND CAST(strftime('%m', feeding.feeding_at / 1000, 'unixepoch') AS INTEGER) = $2
+  	AND CAST(strftime('%Y', feeding.feeding_at / 1000, 'unixepoch') AS INTEGER) = $3;`
+
+	err := r.db.SelectContext(ctx, &feedingDTO, query, chatID, month.Month(), month.Year())
+
+	if err != nil {
+		return nil, err
+	}
+
+	feedings := make([]entity.Feeding, 0, len(feedingDTO))
+
+	for _, feeding := range feedingDTO {
+		feedings = append(feedings,
+			entity.Feeding{
+				ID:        feeding.ID,
+				PetID:     feeding.PetID,
+				FeedingAt: feeding.FeedingAt,
+				FoodType:  feeding.FoodType,
+			},
+		)
+	}
+
+	return feedings, nil
 }
 
 func (r *feedingRepository) Delete(ctx context.Context, id string) error {

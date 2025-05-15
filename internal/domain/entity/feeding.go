@@ -7,5 +7,4 @@ type Feeding struct {
 	PetID     string
 	FeedingAt time.Time
 	FoodType  string
-	CreatedAt time.Time
 }

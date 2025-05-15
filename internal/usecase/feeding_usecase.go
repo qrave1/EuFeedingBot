@@ -11,7 +11,8 @@ import (
 
 type FeedingUsecase interface {
 	Add(ctx context.Context, petID string, feedingAt time.Time, foodType string) error
-	GetForPet(ctx context.Context, petID string) (entity.Feeding, error)
+	GetForPet(ctx context.Context, petID string, month time.Time) ([]entity.Feeding, error)
+	GetForChat(ctx context.Context, chatID int64, month time.Time) ([]entity.Feeding, error)
 	Delete(ctx context.Context, id string) error
 }
 
@@ -29,7 +30,6 @@ func (f *FeedingUsecaseImpl) Add(ctx context.Context, petID string, feedingAt ti
 		PetID:     petID,
 		FeedingAt: feedingAt,
 		FoodType:  foodType,
-		CreatedAt: time.Now(),
 	}
 
 	err := f.feedingRepo.Create(ctx, feeding)
@@ -40,8 +40,12 @@ func (f *FeedingUsecaseImpl) Add(ctx context.Context, petID string, feedingAt ti
 	return nil
 }
 
-func (f *FeedingUsecaseImpl) GetForPet(ctx context.Context, petID string) (entity.Feeding, error) {
-	return f.feedingRepo.GetForPet(ctx, petID)
+func (f *FeedingUsecaseImpl) GetForPet(ctx context.Context, petID string, month time.Time) ([]entity.Feeding, error) {
+	return f.feedingRepo.GetForPet(ctx, petID, month)
+}
+
+func (f *FeedingUsecaseImpl) GetForChat(ctx context.Context, chatID int64, month time.Time) ([]entity.Feeding, error) {
+	return f.feedingRepo.GetForChat(ctx, chatID, month)
 }
 
 func (f *FeedingUsecaseImpl) Delete(ctx context.Context, id string) error {

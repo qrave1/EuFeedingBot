@@ -4,6 +4,8 @@ import (
 	"context"
 	"log"
 	"log/slog"
+	"os"
+	"os/signal"
 	"time"
 
 	"github.com/qrave1/PetFeedingBot/cmd/application/config"
@@ -50,23 +52,31 @@ func main() {
 		return
 	}
 
+	rmPresenter := presenter.NewReplyMarkupPresenter()
+
 	petRepo := repository.NewPetRepo(db)
-
 	petUsecase := usecase.NewPetUsecaseImpl(petRepo)
-
 	petPresenter := presenter.NewPetPresenter()
-
 	petHandler := handlers.NewPetHandlerImpl(petUsecase, petPresenter)
 
-	_ = telegram.NewPetFeedingBot(b, petHandler)
+	feedingRepo := repository.NewFeedingRepository(db)
+	feedingUsecase := usecase.NewFeedingUsecaseImpl(feedingRepo)
+	feedingHandler := handlers.NewFeedingHandlerImpl(feedingUsecase, rmPresenter)
+
+	_ = telegram.NewPetFeedingBot(b, petUsecase, petPresenter, petHandler, feedingUsecase, feedingHandler, rmPresenter)
 
 	// TODO: перенести в app.Start()
 	// старт поллинга бота
 	go b.Start()
 
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, os.Interrupt, os.Kill)
+
+	slog.Info("PetFeedingBot started")
+
 	select {
-	case <-ctx.Done():
-		slog.Info("Shutting down application...")
+	case <-exit:
+		slog.Info("Shutting down PetFeedingBot...")
 
 		// TODO: тут должен быть просто app.Stop()
 		b.Stop()
